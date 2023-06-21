@@ -57,24 +57,48 @@ namespace FormUI
             selectedPerson.DailyCalories = dailyCalories;
             UpdateBindings();
         }
-    }
-}
 
-    public class FitnessApp
-    {
-            public void StartWorkout()
+        private void calculateButton_Click(object sender, EventArgs e)
         {
-            WorkoutManager workoutManager = new WorkoutManager();
-            workoutManager.Start();
+            decimal weight = decimal.Parse(weightTextBox.Text);
+            int calories = int.Parse(caloriesTextBox.Text);
 
-            // Prompt the user for weight and caloric intake
+            // Perform the calculation for the workout plan based on weight and calories
+            string workoutPlan = CalculateWorkoutPlan(weight, calories);
+
+            // Display the workout plan to the user (you can use a label or any other control)
+            workoutPlanLabel.Text = workoutPlan;
+        }
+
+        private string CalculateWorkoutPlan(decimal weight, int calories)
+        {
+            // Implement your logic to calculate the workout plan based on weight and calories
+            // Return the calculated workout plan as a string
+            // You can customize this method according to your specific requirements
+
+            // Example implementation:
+            string workoutPlan = $"Your workout plan for weight {weight} and calories {calories} goes here.";
+
+            return workoutPlan;
+        }
+    }
+
+
+    public class logging
+    {
+        public void logger()
+        {
             Console.Write("Enter your weight: ");
             decimal weight = Convert.ToDecimal(Console.ReadLine());
 
             Console.Write("Enter your caloric intake: ");
             int calories = Convert.ToInt32(Console.ReadLine());
 
-            // Store the weight and caloric intake
-            StoreWeightAndCaloricIntake(weight, calories);
+            // Create an instance of StorageManager
+            StorageManager storageManager = new StorageManager();
+
+            // Call the method from StorageManager to store the weight and caloric intake
+            storageManager.StoreWeightAndCaloricIntake(weight, calories);
         }
     }
+}

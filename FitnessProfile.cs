@@ -3,40 +3,47 @@
 // then depositing data into sql storage for retrieval of values like monthCalAv - an averaged value on future usage
 // data input should be intially collected from the FormUI Namespace
 
+    // public class User
+    // {
+    //     public int Id { get; set; }
+    //     public string Name { get; set; }
+    //     public int Age { get; set; }
+    //     public decimal CurrentWeight { get; set; }
+    //     public decimal GoalWeight { get; set; }
+    //     public int WeekCalAv { get; set; }
+    //     public int MonthCalAv { get; set; }
+    //     public int DailyCalories { get; set; }
+    // }
+
+    // public class WeightLog
+    // {
+    //     public int Id { get; set; }
+    //     public int UserId { get; set; }
+    //     public DateTime Date { get; set; }
+    //     public decimal Weight { get; set; }
+    // }
+
+    // public class CaloricIntakeLog
+    // {
+    //     public int Id { get; set; }
+    //     public int UserId { get; set; }
+    //     public DateTime Date { get; set; }
+    //     public int Calories { get; set; }
+    // }
 
 
-
-namespace User
+namespace Profile
 {
-    public class Profile
+    public class UserProfile
     {
-        public string Username { get => username; set => username = value; }
-        public decimal CurrentWeight { get => currentWeight; set => currentWeight = value; }
-        public decimal GoalWeight { get => goalWeight; set => goalWeight = value; }
-        public int WeekCalAv { get => weekCalAv; set => weekCalAv  = value; }
-        public int MonthCalAv{ get => monthCalAv; set => monthCalAv = value; }
-        public int DailyCalories { get => dailyCalories; set => dailyCalories = value; }
-        public int Height
-        {
-            get { return height; }
-            set
-            {
-                if (value >= 0)
-                    height = value;
-            }
-        }
-
-        public int Age
-        {
-            get { return age; }
-            set
-            {
-                if (value >= 0)
-                    age = value;
-            }
-        }
-
-    }
+        public string Username { get; set; }
+        public decimal CurrentWeight { get; set; }
+        public decimal GoalWeight { get; set; }
+        public int WeekCalAv { get; set; }
+        public int MonthCalAv { get; set; }
+        public int DailyCalories { get; set; }
+        public int Height { get; set; }
+        public int Age { get; set; }
 
         public void SaveProfile()
         {
