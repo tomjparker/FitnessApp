@@ -1,96 +1,26 @@
-// need to install NuGet package for microsoft SQL (entity framework)
+// need to install NuGet package for microsoft SQL (entity framework) - axed for influx now
 // need to run (Bash) Enable-Migrations
 // yet to understand the SQL interactions - need to know how this data gets stored
-using System.Data.Entity;
-using System.Data.Entity.Migrations;
+using InfluxDB.Client;
+using InfluxDB.Client.Api.Domain;
+using InfluxDB.Client.Writes;
 
-namespace Data;
-    public class User
+namespace Data
+{
+    public class StorageManager
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public int Age { get; set; }
-        public decimal CurrentWeight { get; set; }
-        public decimal GoalWeight { get; set; }
-        public int WeekCalAv { get; set; }
-        public int MonthCalAv { get; set; }
-        public int DailyCalories { get; set; }
-
-        public virtual ICollection<WeightLog> WeightLogs { get; set; }
-        public virtual ICollection<CaloricIntakeLog> CaloricIntakeLogs { get; set; }
-    }
-
-    // needs a rework
-    public class WeightLog
-    {
-        public int Id { get; set; }
-        public int UserId { get; set; }
-        public DateTime Date { get; set; }
-        public decimal Weight { get; set; }
-
-        public User User { get; set; }
-
-    }
-
-        // Example 
-        // int userId = 1; Replace with the actual user ID
-        // decimal weight = 75.5M; Replace with the user's weight
-        // int calories = 2000; Replace with the caloric intake value
-
-        // StoreWeightAndCaloricIntake(userId, weight, calories);
-
-    public class CaloricIntakeLog
+        public void StoreWeightAndCaloricIntake(int userId, decimal weight, int calories)
         {
-            public int Id { get; set; }
-            public int UserId { get; set; }
-            public DateTime Date { get; set; }
-            public int Calories { get; set; }
-
-            public User User { get; set; }
-        }
-    
-    public class FitnessAppContext : DbContext
-    {
-        public DbSet<Account> Accounts { get; set; }
-        public DbSet<WeightLog> WeightLogs { get; set; }
-
-        public FitnessAppContext() : base("YourConnectionString")
-        {
-            // Replace "YourConnectionString" with your SQL Server connection string
-        }
-    }
-
-    public void StoreWeightAndCaloricIntake(int userId, decimal weight, int calories)
-    {
-        try
-        {
-            using (var context = new FitnessAppContext())
+            try
             {
-                var user = context.Users.Find(userId);
+            using (var influxClient = InfluxDBClientFactory.Create("http://localhost:8086", "V4T8kAjXf_rLlfqrB2pOZM_ooHwa3_kO8GJz4CVRK9iN_4pXWBlcNqd7_p8VqwqCwVM5eGRTlJY-zXrWuLaASg==".ToCharArray()))
+            {
+                var writeApi = influxClient.GetWriteApi();
 
-                if (user != null)
-                {
-                    // Create weight log entry
-                    var weightLog = new WeightLog
-                    {
-                        User = user,
-                        Date = DateTime.Now,
-                        Weight = weight
-                    };
-                    context.WeightLogs.Add(weightLog);
+                WriteMeasurement(writeApi, "weight_logs", userId, weight);
+                WriteMeasurement(writeApi, "caloric_intake_logs", userId, calories);
 
-                    // Create caloric intake log entry
-                    var caloricIntakeLog = new CaloricIntakeLog
-                    {
-                        User = user,
-                        Date = DateTime.Now,
-                        Calories = calories
-                    };
-                    context.CaloricIntakeLogs.Add(caloricIntakeLog);
-
-                    // Save changes to the database
-                    context.SaveChanges();
-                }
+                writeApi.Flush();
             }
         }
         catch (Exception ex)
@@ -100,28 +30,31 @@ namespace Data;
         }
     }
 
-    public class FitnessAppContext : DbContext
-    {
-        public DbSet<User> Users { get; set; }
-        public DbSet<WeightLog> WeightLogs { get; set; }
-
-        public FitnessAppContext() : base("YourConnectionString")
+        private void WriteMeasurement(WriteApi writeApi, string measurementName, int userId, decimal value)
         {
-            // Replace "YourConnectionString" with your SQL Server connection string
+            var point = PointData.Measurement(measurementName)
+                .Tag("UserId", userId.ToString())
+                .Field("Value", value)
+                .Timestamp(DateTime.UtcNow, WritePrecision.Ms);
+
+            writeApi.WritePoint("my-bucket", "my-org", point);
         }
     }
-
-    internal sealed class Configuration : DbMigrationsConfiguration<FitnessAppContext>
+    public class logging
     {
-        public Configuration()
+        public void logger()
         {
-            AutomaticMigrationsEnabled = true;
+            Console.Write("Enter your weight: ");
+            decimal weight = Convert.ToDecimal(Console.ReadLine());
+
+            Console.Write("Enter your caloric intake: ");
+            int calories = Convert.ToInt32(Console.ReadLine());
+
+            // Create an instance of StorageManager
+            StorageManager storageManager = new StorageManager();
+
+            // Call the method from StorageManager to store the weight and caloric intake
+            storageManager.StoreWeightAndCaloricIntake(weight, calories);
         }
-
-        protected override void Seed(FitnessAppContext context)
-        {
-            // Add seed data or initial records here
-        }
-    }
-
-
+    } 
+}
